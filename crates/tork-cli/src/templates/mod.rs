@@ -63,24 +63,24 @@ pub fn git_dep(git: &str, branch: Option<&str>) -> String {
     }
 }
 
-/// Builds the `tork-orm` dependency table, selecting the backend feature.
+/// Builds the `tork-orm` dependency table, selecting the backend feature plus the
+/// `tork` framework integration (a generated Tork project uses it).
 ///
-/// SQLite uses the default features; Postgres/MySQL turn the defaults off and
-/// enable their backend plus the framework integration and migrations.
+/// The ORM is framework-agnostic by default, so every backend is requested
+/// explicitly together with `tork` and `migrations`.
 pub fn orm_dep(git: &str, branch: Option<&str>, db: Database) -> String {
+    let backend = match db {
+        Database::Postgres => "postgres",
+        Database::Mysql => "mysql",
+        _ => "sqlite",
+    };
     let mut table = format!("{{ git = \"{git}\"");
     if let Some(branch) = branch {
         table.push_str(&format!(", branch = \"{branch}\""));
     }
-    match db {
-        Database::Postgres => {
-            table.push_str(", default-features = false, features = [\"postgres\", \"tork\", \"migrations\"]");
-        }
-        Database::Mysql => {
-            table.push_str(", default-features = false, features = [\"mysql\", \"tork\", \"migrations\"]");
-        }
-        _ => {}
-    }
+    table.push_str(&format!(
+        ", default-features = false, features = [\"{backend}\", \"tork\", \"migrations\"]"
+    ));
     table.push_str(" }");
     table
 }
