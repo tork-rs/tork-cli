@@ -31,7 +31,8 @@ pub fn run(args: &NewArgs, style: &Style) -> Result<(), String> {
         fs::create_dir(&root).map_err(|e| format!("cannot create `{}`: {e}", root.display()))?;
     }
 
-    let dep = templates::git_dep(&args.git, args.branch.as_deref());
+    let tork_dep = templates::git_dep(&args.framework_git, args.branch.as_deref());
+    let orm_dep = templates::git_dep(&args.orm_git, args.branch.as_deref());
     ui::header(style, &format!("Creating {}", args.name));
 
     for file in templates::files() {
@@ -40,7 +41,7 @@ pub fn run(args: &NewArgs, style: &Style) -> Result<(), String> {
             fs::create_dir_all(parent)
                 .map_err(|e| format!("cannot create `{}`: {e}", parent.display()))?;
         }
-        let content = templates::render(file.content, &args.name, &dep);
+        let content = templates::render(file.content, &args.name, &tork_dep, &orm_dep);
         fs::write(&path, content).map_err(|e| format!("cannot write `{}`: {e}", path.display()))?;
         ui::created(style, file.path);
     }

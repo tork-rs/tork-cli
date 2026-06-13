@@ -6,9 +6,11 @@ use clap::{Args, Parser, Subcommand};
 
 pub use tork_orm_cli::cli::{GlobalArgs, MigrateCommand};
 
-/// The default git source for the `tork` / `tork-orm` dependencies of a new
-/// project. Override with `tork new --git <url>`.
-pub const DEFAULT_TORK_GIT: &str = "https://github.com/muzakon/tork.git";
+/// The default git source for a new project's framework dependency (`tork`).
+pub const DEFAULT_FRAMEWORK_GIT: &str = "https://github.com/muzakon/tork-framework.git";
+
+/// The default git source for a new project's ORM dependency (`tork-orm`).
+pub const DEFAULT_ORM_GIT: &str = "https://github.com/muzakon/tork-orm.git";
 
 /// Colored clap help (green headers/usage, cyan literals).
 fn help_styles() -> Styles {
@@ -85,11 +87,15 @@ pub struct NewArgs {
     #[arg(long)]
     pub here: bool,
 
-    /// The git URL the generated project depends on for `tork`/`tork-orm`.
-    #[arg(long, default_value = DEFAULT_TORK_GIT)]
-    pub git: String,
+    /// The git URL for the generated project's framework dependency (`tork`).
+    #[arg(long, default_value = DEFAULT_FRAMEWORK_GIT)]
+    pub framework_git: String,
 
-    /// Pin the git dependency to a branch (default: the repository's default branch).
+    /// The git URL for the generated project's ORM dependency (`tork-orm`).
+    #[arg(long, default_value = DEFAULT_ORM_GIT)]
+    pub orm_git: String,
+
+    /// Pin the git dependencies to a branch (default: each repo's default branch).
     #[arg(long)]
     pub branch: Option<String>,
 }

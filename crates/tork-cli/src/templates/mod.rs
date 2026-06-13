@@ -21,9 +21,13 @@ pub fn git_dep(git: &str, branch: Option<&str>) -> String {
     }
 }
 
-/// Substitutes the placeholders in a template.
-pub fn render(content: &str, name: &str, dep: &str) -> String {
-    content.replace("@NAME@", name).replace("@DEP@", dep)
+/// Substitutes the placeholders in a template: the project name and the two git
+/// dependency tables (framework and ORM).
+pub fn render(content: &str, name: &str, tork_dep: &str, orm_dep: &str) -> String {
+    content
+        .replace("@NAME@", name)
+        .replace("@TORK_DEP@", tork_dep)
+        .replace("@ORM_DEP@", orm_dep)
 }
 
 /// Every file in the generated project, in creation order.
@@ -55,8 +59,8 @@ edition = "2021"
 publish = false
 
 [dependencies]
-tork = @DEP@
-tork-orm = @DEP@
+tork = @TORK_DEP@
+tork-orm = @ORM_DEP@
 # garde's derive references `::garde` directly, so #[api_model] models need it.
 garde = { version = "0.23", features = ["derive", "email"] }
 tokio = { version = "1", features = ["rt-multi-thread", "macros"] }
@@ -81,7 +85,7 @@ const ENV_EXAMPLE: &str = "# Copy to .env and adjust.\nRUST_LOG=info\nDB_URL=sql
 
 const README: &str = r#"# @NAME@
 
-A web service built on the [Tork](https://github.com/muzakon/tork) framework.
+A web service built on the [Tork](https://github.com/muzakon/tork-framework) framework.
 
 ## Develop
 
