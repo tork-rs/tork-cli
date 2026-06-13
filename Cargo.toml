@@ -22,6 +22,8 @@ tork-orm-cli = { path = "../orm/crates/tork-orm-cli", version = "0.1.0", default
 clap = { version = "4", features = ["derive", "env"] }
 tokio = { version = "1.52", features = ["rt-multi-thread", "macros", "process", "signal", "time", "sync"] }
 notify = "6"
+# Arrow-key interactive prompts (the project name and database selection).
+dialoguer = { version = "0.11", default-features = false }
 
 [profile.release]
 opt-level = 3

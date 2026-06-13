@@ -5,6 +5,8 @@ use std::fs;
 use std::path::PathBuf;
 use std::process::Command;
 
+use dialoguer::theme::ColorfulTheme;
+use dialoguer::{Input, Select};
 use tork_orm_cli::Style;
 
 use crate::cli::NewArgs;
@@ -72,7 +74,10 @@ fn resolve_name(args: &NewArgs, style: &Style, interactive: bool) -> Result<Stri
         return Err("a project name is required (e.g. `tork new my_app`)".to_owned());
     }
     loop {
-        let answer = ui::prompt(style, "Project name?", Some("my_app"))
+        let answer: String = Input::with_theme(&ColorfulTheme::default())
+            .with_prompt("Project name")
+            .default("my_app".to_owned())
+            .interact_text()
             .map_err(|e| format!("could not read input: {e}"))?;
         match validate_name(&answer) {
             Ok(name) => return Ok(name),
@@ -81,8 +86,8 @@ fn resolve_name(args: &NewArgs, style: &Style, interactive: bool) -> Result<Stri
     }
 }
 
-/// Resolves the database backend from `--db` or interactive prompts.
-fn resolve_database(args: &NewArgs, style: &Style, interactive: bool) -> Result<Database, String> {
+/// Resolves the database backend from `--db` or an interactive arrow-key menu.
+fn resolve_database(args: &NewArgs, _style: &Style, interactive: bool) -> Result<Database, String> {
     if let Some(value) = &args.db {
         return Database::parse(value)
             .ok_or_else(|| format!("unknown database `{value}` (sqlite, postgres, mysql, or none)"));
@@ -91,22 +96,18 @@ fn resolve_database(args: &NewArgs, style: &Style, interactive: bool) -> Result<
         // Non-interactive default keeps the previous behavior: a SQLite project.
         return Ok(Database::Sqlite);
     }
-    let wants_db = ui::confirm(style, "Add a database?", true)
+    let options = ["SQLite", "PostgreSQL", "MySQL", "No database"];
+    let choice = Select::with_theme(&ColorfulTheme::default())
+        .with_prompt("Database")
+        .items(&options)
+        .default(0)
+        .interact()
         .map_err(|e| format!("could not read input: {e}"))?;
-    if !wants_db {
-        return Ok(Database::None);
-    }
-    let choice = ui::select(
-        style,
-        "Which database?",
-        &["SQLite", "PostgreSQL", "MySQL"],
-        0,
-    )
-    .map_err(|e| format!("could not read input: {e}"))?;
     Ok(match choice {
+        0 => Database::Sqlite,
         1 => Database::Postgres,
         2 => Database::Mysql,
-        _ => Database::Sqlite,
+        _ => Database::None,
     })
 }
 

@@ -24,3 +24,4 @@ tork-orm-cli = { workspace = true }
 clap = { workspace = true }
 tokio = { workspace = true }
 notify = { workspace = true }
+dialoguer = { workspace = true }
